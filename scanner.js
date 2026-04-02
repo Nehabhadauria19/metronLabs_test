@@ -13,7 +13,7 @@ const scanProject = async (project) => {
 
     const files = treeRes.data.map((f) => f.name);
 
-    // 🔴 Sensitive Files Check
+    
     files.forEach((file) => {
       if (SENSITIVE_FILES.includes(file)) {
         issues.push({
@@ -41,7 +41,7 @@ const scanProject = async (project) => {
       });
     }
 
-    // 🔍 Secret Scan (sample: only first few files)
+    
     for (let file of treeRes.data.slice(0, 5)) {
       if (file.type === "blob") {
         try {
