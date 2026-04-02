@@ -6,18 +6,29 @@ const { scanProject } = require("./scanner");
 
 const app = express();
 
-// serve frontend
+
+
+
+
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/api/scan", async (req, res) => {
-  let username = req.query.username || "gitlab-org";
+  let username = req.query.username;
+
+  if (!username) {
+    return res.json({
+      error: "Please provide username ?username=xyz",
+    });
+  }
 
   let projects = await getProjects(username);
 
-  // fallback if empty
   if (projects.length === 0) {
-    username = "gitlab-org";
-    projects = await getProjects(username);
+    return res.json({
+      message: "No public repos found",
+      results: [],
+    });
   }
 
   const results = [];
