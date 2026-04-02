@@ -46,7 +46,9 @@
 
 <input id="username" placeholder="Enter GitLab username" />
 <button onclick="scan()">Scan</button>
-
+<div id="loader" style="display:none; text-align:center; margin-top:20px;">
+  <p>🔄 Scanning repositories... Please wait</p>
+</div>
 <table>
   <thead>
     <tr>
@@ -62,37 +64,49 @@
 async function scan() {
   const username = document.getElementById("username").value;
 
-  const res = await fetch(`/api/scan?username=${username}`);
-  const data = await res.json();
-
+  const loader = document.getElementById("loader");
   const tbody = document.getElementById("tbody");
+
+  loader.style.display = "block";
   tbody.innerHTML = "";
 
-  if (!data.results || data.results.length === 0) {
-    tbody.innerHTML = "<tr><td colspan='3'>No data found</td></tr>";
-    return;
-  }
+  try {
+    const res = await fetch(`/api/scan?username=${username}`);
+    const data = await res.json();
 
-  data.results.forEach(project => {
-    if (project.issues.length === 0) {
-      tbody.innerHTML += `
-        <tr>
-          <td>${project.project}</td>
-          <td>No Issues</td>
-          <td class="low">Safe</td>
-        </tr>`;
-    } else {
-      project.issues.forEach(issue => {
-        const cls = issue.severity.toLowerCase();
+    
+    loader.style.display = "none";
+
+    if (!data.results || data.results.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='3'>No data found</td></tr>";
+      return;
+    }
+
+    data.results.forEach(project => {
+      if (project.issues.length === 0) {
         tbody.innerHTML += `
           <tr>
             <td>${project.project}</td>
-            <td>${issue.message}</td>
-            <td class="${cls}">${issue.severity}</td>
+            <td>No Issues</td>
+            <td class="low">Safe</td>
           </tr>`;
-      });
-    }
-  });
+      } else {
+        project.issues.forEach(issue => {
+          const cls = issue.severity.toLowerCase();
+          tbody.innerHTML += `
+            <tr>
+              <td>${project.project}</td>
+              <td>${issue.message}</td>
+              <td class="${cls}">${issue.severity}</td>
+            </tr>`;
+        });
+      }
+    });
+
+  } catch (err) {
+    loader.style.display = "none";
+    tbody.innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
+  }
 }
 </script>
 

@@ -12,7 +12,7 @@ if (!username) {
 }
 
 const run = async () => {
-  console.log(`🔍 Scanning GitLab user: ${username}\n`);
+//   console.log(`Scanning GitLab user: ${username}\n`);
 
   const projects = await getProjects(username);
 
